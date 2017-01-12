@@ -9,3 +9,7 @@ Gesproken met Peerby Go, tegen een privacy probleem aangelopen. De locatie van h
 
 ## Dag 3
 Tijdens de teambespreking aan bod gekomen dat ik nog even goed moet nadenken over storytelling. Daarnaast nog even goed kijken naar MVP. Optie zou zijn om een slider te implementeer.
+Rest van de dag aan het prototype gewerkt, ofwel een basis opzet van gemaakt van de html, google maps api aan de praat gekregen en verder nog veel voorbeelden gezocht op de D3 website.
+
+## Dag 4
+Teambespreking gaf complimenten voor opzet pagina, verder vooral beginnen met het echt maken van figuren voordat ze daar meer over kunnen zeggen.

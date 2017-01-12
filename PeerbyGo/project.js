@@ -10,7 +10,8 @@ var map = new google.maps.Map(d3.select("#map").node(), {
 
 d3.json("../Data/transactions-of-3-random-days.json", function(error, data) {
   if (error) throw error;
-  console.log(data)
+  console.log(data[1].fakeId)
+
 
   var overlay = new google.maps.OverlayView();
 
@@ -26,7 +27,6 @@ d3.json("../Data/transactions-of-3-random-days.json", function(error, data) {
           padding = 10;
     };
   };
-  console.log("hello")
   // Bind our overlay to the map…
   overlay.setMap(map);
 });
