@@ -28,3 +28,6 @@ Ik zal veel kennis moet opdoen over het laten verschijnen van data op basis van 
 ### Pagina voorbeeld
 ![alt text](https://github.com/JelleMul/programmeerproject/blob/master/doc/pagina%20programmeerproject%20voorbeeld.png "Voorbeeld pagina")
 In de afbeelding worden de verschillende visualisaties weergeven. Op de kaart worden met de rondjes het vertrekpunt van de verschillende transacties weergegeven. Rechtsbovenin wordt de huidige tijd afgebeeld. Wanneer 2 punten met elkaar zijn verbonden betekend dit dat deze transactie heeft plaatsgevonden. Wanneer het punt nog niet verbonden is met een ander punt zal deze later op de dag nog plaatsvinden. Bij het punt linksonderin is te zien dat de bezorger nog onderweg is aangezien het wel vertrokken is maar nog niet eindigt bij een punt.
+
+### prototype
+![alt text](https://github.com/JelleMul/programmeerproject/blob/master/doc/prototype.PNG "Prototype")
