@@ -5,7 +5,7 @@ body {
   background-color: lightblue;
 }
 #container {
-  width: 1000px;
+  width: 900px;
   height: 100%;
   margin: auto;
   background-color: rgb(89,152,229)
@@ -14,6 +14,7 @@ body {
 #map {
   width: 95%;
   height: 500px;
+  background-color: grey;
   margin: auto;
   margin-left: 25px;
   margin-right: 25px;
@@ -35,15 +36,38 @@ img {
   margin-right: 25px;
 }
 
-#barchart {
-  border:3px solid black;
-  width: 50%;
-  height: 400px;
-  float: left;
+#dashboard {
+  margin-top: 20px;
+  margin-left: 25px;
+  margin-right: 25px;
 }
 
-#piechart {
-  border:3px solid black;
-  height: 400px;
-  overflow: hidden;
+path {  stroke: #fff; }
+path:hover {  opacity:0.9; }
+rect:hover {  fill:blue; }
+.axis {  font: 10px sans-serif; }
+.legend tr{    border-bottom:1px solid grey; }
+.legend tr:first-child{    border-top:1px solid grey; }
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.x.axis path {  display: none; }
+.legend{
+    margin-bottom:76px;
+    display:inline-block;
+    border-collapse: collapse;
+    border-spacing: 0px;
+}
+.legend td{
+    padding:4px 5px;
+    vertical-align:bottom;
+}
+.legendFreq, .legendPerc{
+    align:right;
+    width:50px;
 }

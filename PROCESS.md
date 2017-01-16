@@ -19,3 +19,5 @@ Idee gepresenteerd. Veder niet veel code geschreven.
 
 ## Dag 6
 Bij teambespreking mogelijke opstakels besproken. En planning voor deze week besproken. In ieder de barchart en piechart afmaken, en aan elkaar gelinked hebben. Overige tijd stoppen in de kaart visualisatie.
+
+Zeer nuttige dag. Het dashboard voorbeeld uit het designdocument kunnen toepassen op mijn data. Hierdoor dus 2 grafieken "af" die aan elkaar zijn gelinked. Daarnaast nog even aan PeerbyGo gevraagd of er misschien meer data beschikbaar is, dit zou het wat inzichtelijker kunnen maken. 
