@@ -13,3 +13,9 @@ Rest van de dag aan het prototype gewerkt, ofwel een basis opzet van gemaakt van
 
 ## Dag 4
 Teambespreking gaf complimenten voor opzet pagina, verder vooral beginnen met het echt maken van figuren voordat ze daar meer over kunnen zeggen.
+
+## Dag 5
+Idee gepresenteerd. Veder niet veel code geschreven.
+
+## Dag 6
+Bij teambespreking mogelijke opstakels besproken. En planning voor deze week besproken. In ieder de barchart en piechart afmaken, en aan elkaar gelinked hebben. Overige tijd stoppen in de kaart visualisatie.
