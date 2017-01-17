@@ -62,14 +62,13 @@ d3.json("../Data/transactions-of-3-random-days.json", function(error, data) {
     for (i = 0; i < timedata.length; i++) {
       total_transactions[i] = sum(timedata[i].categories)
     }
-    console.log(timedata, "timedata")
     function dashboard(id, fData){
       var barColor = 'lightgreen';
-      function segColor(c){ return {Christmas:"#a6cee3", Cooking:"#1f78b4", Cycling:"#b2df8a", Entertainment:"#33a02c", Garden: "#fb9a99", Home_improvement:"#e31a1c", Kitchen:"#fdbf6f", Moving:"#ff7f00", Office:"#cab2d6", Party:"#6a3d9a", TV:"#ffff99", Video:"#b15928", Woodwork:"#a6cee3", Festival:"#1f78b4", game_night:"#b2df8a", going_outside:"#33a02c", koningsdag:"#fb9a99", oktoberfest:"#e31a1c", partytent:"#fdbf6f", sinterklaas:"#ff7f00"}[c]; }
+      function segColor(c){ return {Christmas:"#a6cee3", Cooking:"#1f78b4", Cycling:"#b2df8a", Entertainment:"#33a02c", Garden: "#fb9a99", Home_improvement:"#e31a1c", Kitchen:"#fdbf6f", Moving:"#ff7f00", Office:"#cab2d6", Party:"#6a3d9a", TV:"#ffff99", Video:"#b15928", Woodwork:"#a6cee3", festival:"#1f78b4", game_night:"#b2df8a", going_outside:"#33a02c", koningsdag:"#fb9a99", oktoberfest:"#e31a1c", partytent:"#fdbf6f", sinterklaas:"#ff7f00"}[c]; }
 
       // compute total for each state.
       fData.forEach(function(d){d.total = sum(d.categories)});
-
+      console.log(fData)
       // function to handle histogram.
       function histoGram(fD){
           var hG={},    hGDim = {t: 60, r: 0, b: 30, l: 0};
@@ -155,6 +154,7 @@ d3.json("../Data/transactions-of-3-random-days.json", function(error, data) {
 
       // function to handle pieChart.
       function pieChart(pD){
+          console.log(pD)
           var pC ={},    pieDim ={w:300, h: 300};
           pieDim.r = Math.min(pieDim.w, pieDim.h) / 2;
 
@@ -185,10 +185,8 @@ d3.json("../Data/transactions-of-3-random-days.json", function(error, data) {
               // call the update function of histogram with new data.
               hG.update(fData.map(function(v){
                 if (v.categories[d.data.type] == undefined) {
-                  console.log("test")
                   v.categories[d.data.type] = 0
                 }
-                console.log(v.time, v.categories[d.data.type])
                   return [v.time,v.categories[d.data.type]];}),segColor(d.data.type));
           }
           //Utility function to be called on mouseout a pie slice.
@@ -209,7 +207,6 @@ d3.json("../Data/transactions-of-3-random-days.json", function(error, data) {
 
       // function to handle legend.
       function legend(lD){
-          console.log(lD, "lD")
           var leg = {};
 
           // create table for legend.
@@ -252,18 +249,18 @@ d3.json("../Data/transactions-of-3-random-days.json", function(error, data) {
 
           return leg;
       }
-      console.log(fData, "fData")
+
       // calculate total frequency by segment for all state.
 
       var test = Object.keys(fData[1].categories)
-      console.log(test, "test")
-
-      var tF = ['Christmas', 'Cooking', 'Cycling', 'Entertainment', 'Garden', 'Home_improvement', 'Kitchen', 'Moving', 'Office', 'Party', 'TV', 'Video', 'Woodwork', 'Festival', 'game_night', 'going_outside', 'koningsdag', 'oktoberfest', 'partytent', 'sinterklaas'].map(function(d){
+      counter = 1
+      var tF = ['Christmas', 'Cooking', 'Cycling', 'Entertainment', 'Garden', 'Home_improvement', 'Kitchen', 'Moving', 'Office', 'Party', 'TV', 'Video', 'Woodwork', 'festival', 'game_night', 'going_outside', 'koningsdag', 'oktoberfest', 'partytent', 'sinterklaas'].map(function(d){
           return {type:d, freq: d3.sum(fData.map(function(t){
-            console.log(d)
-            console.log(t)
             if (d in t.categories) {
-              console.log("hij zit erin")
+              console.log(d)
+              console.log(t.categories, counter)
+              counter++;
+              console.log(t.categories[d])
               return t.categories[d]
             }
             ;}))};
@@ -290,18 +287,6 @@ d3.json("../Data/transactions-of-3-random-days.json", function(error, data) {
             padding = 10;
       };
     };
-    var freqData=[
-    {State:'AL',freq:{low:4786, mid:1319, high:249}}
-    ,{State:'AZ',freq:{low:1101, mid:412, high:674}}
-    ,{State:'CT',freq:{low:932, mid:2149, high:418}}
-    ,{State:'DE',freq:{low:832, mid:1152, high:1862}}
-    ,{State:'FL',freq:{low:4481, mid:3304, high:948}}
-    ,{State:'GA',freq:{low:1619, mid:167, high:1063}}
-    ,{State:'IA',freq:{low:1819, mid:247, high:1203}}
-    ,{State:'IL',freq:{low:4498, mid:3852, high:942}}
-    ,{State:'IN',freq:{low:797, mid:1849, high:1534}}
-    ,{State:'KS',freq:{low:162, mid:379, high:471}}
-    ];
 
     dashboard('#dashboard',timedata);
     // Bind our overlay to the map…
