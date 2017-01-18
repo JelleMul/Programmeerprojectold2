@@ -71,3 +71,11 @@ rect:hover {  fill:blue; }
     align:right;
     width:50px;
 }
+
+.gmnoprint img {
+  max-height: none;
+}
+
+.gm-style img {
+  max-height: none;
+}

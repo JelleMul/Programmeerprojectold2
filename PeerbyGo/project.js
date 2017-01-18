@@ -13,7 +13,8 @@ var map = new google.maps.Map(d3.select("#map").node(), {
   zoom: 14,
   zoomcontrol: true,
   center: new google.maps.LatLng(52.373093, 4.897353),
-  mapTypeId: google.maps.MapTypeId.TERRAIN
+  mapTypeId: google.maps.MapTypeId.TERRAIN,
+  scrollwheel: false
 });
 
 
@@ -64,11 +65,11 @@ d3.json("../Data/transactions-of-3-random-days.json", function(error, data) {
     }
     function dashboard(id, fData){
       var barColor = 'lightgreen';
-      function segColor(c){ return {Christmas:"#a6cee3", Cooking:"#1f78b4", Cycling:"#b2df8a", Entertainment:"#33a02c", Garden: "#fb9a99", Home_improvement:"#e31a1c", Kitchen:"#fdbf6f", Moving:"#ff7f00", Office:"#cab2d6", Party:"#6a3d9a", TV:"#ffff99", Video:"#b15928", Woodwork:"#a6cee3", festival:"#1f78b4", game_night:"#b2df8a", going_outside:"#33a02c", koningsdag:"#fb9a99", oktoberfest:"#e31a1c", partytent:"#fdbf6f", sinterklaas:"#ff7f00"}[c]; }
+      function segColor(c){ return {Christmas:"#a6cee3", Cooking:"#1f78b4", Cycling:"#b2df8a", Electronics:"#33a02c", Entertainment:"#33a02c", Garden: "#fb9a99", Home_improvement:"#e31a1c", Ironwork:"#e31a1c", Kitchen:"#fdbf6f", Moving:"#ff7f00", Office:"#cab2d6", Party:"#6a3d9a", Photo:"#6a3d9a", TV:"#ffff99", Video:"#b15928", Woodwork:"#a6cee3", boormachine:"#a6cee3", festival:"#1f78b4", game_night:"#b2df8a", going_outside:"#33a02c", koningsdag:"#fb9a99", oktoberfest:"#e31a1c", partytent:"#fdbf6f", sinterklaas:"#ff7f00"}[c]; }
 
       // compute total for each state.
       fData.forEach(function(d){d.total = sum(d.categories)});
-      console.log(fData)
+      console.log(fData, "fData")
       // function to handle histogram.
       function histoGram(fD){
           var hG={},    hGDim = {t: 60, r: 0, b: 30, l: 0};
@@ -116,18 +117,40 @@ d3.json("../Data/transactions-of-3-random-days.json", function(error, data) {
 
           function mouseover(d){  // utility function to be called on mouseover.
               // filter for selected state.
-              var st = fData.filter(function(s){ return s.time == d[0];})[0],
-                  nD = d3.keys(st.categories).map(function(s){ return {type:s, freq:st.categories[s]};});
+              var st = fData.filter(function(s){ return s.time == d[0];})[0]
+              console.log(st)
+              typeList = [];
+              for (var key in st.categories) {
+                if (typeList.indexOf(key) == -1) {
+                  typeList.push(key)
+                };
+              };
+              typeList.sort();
+
+              console.log(typeList, "typeList")
+              var nD = typeList.map(function(d){
+                  return {type:d, freq: d3.sum(fData.map(function(t){
+                    if (d in t.categories) {
+                      // console.log(d)
+                      // console.log(t.categories, counter)
+                      // counter++;
+                      return t.categories[d]
+                    };
+                  }))};
+              });
+
+              console.log(nD, "nD")
 
               // call update functions of pie-chart and legend.
               pC.update(nD);
-              leg.update(nD);
+              var leg= legend(nD);
           }
 
           function mouseout(d){    // utility function to be called on mouseout.
               // reset the pie-chart and legend.
+
               pC.update(tF);
-              leg.update(tF);
+              var leg= legend(tF);
           }
 
           // create function to update the bars. This will be used by pie-chart.
@@ -154,7 +177,6 @@ d3.json("../Data/transactions-of-3-random-days.json", function(error, data) {
 
       // function to handle pieChart.
       function pieChart(pD){
-          console.log(pD)
           var pC ={},    pieDim ={w:300, h: 300};
           pieDim.r = Math.min(pieDim.w, pieDim.h) / 2;
 
@@ -207,12 +229,19 @@ d3.json("../Data/transactions-of-3-random-days.json", function(error, data) {
 
       // function to handle legend.
       function legend(lD){
+          var Parent = document.getElementById("legenda");
+          if (Parent != null) {
+            while(Parent.hasChildNodes())
+            {
+             Parent.removeChild(Parent.firstChild);
+            }
+          };
           var leg = {};
 
           // create table for legend.
-          var legend = d3.select(id).append("table").attr('class','legend');
+          var legend = d3.select(id).append("table").attr('id', 'legenda').attr('class','legend');
 
-          // create one row per segment.
+          // create one row per segment.s
           var tr = legend.append("tbody").selectAll("tr").data(lD).enter().append("tr");
 
           // create the first column for each segment.
@@ -221,7 +250,8 @@ d3.json("../Data/transactions-of-3-random-days.json", function(error, data) {
   			.attr("fill",function(d){ return segColor(d.type); });
 
           // create the second column for each segment.
-          tr.append("td").text(function(d){ return d.type;});
+          tr.append("td").attr("class",'LegendName')
+              .text(function(d){ return d.type;});
 
           // create the third column for each segment.
           tr.append("td").attr("class",'legendFreq')
@@ -237,7 +267,8 @@ d3.json("../Data/transactions-of-3-random-days.json", function(error, data) {
               var l = legend.select("tbody").selectAll("tr").data(nD);
 
               // update the frequencies.
-              l.select(".legendFreq").text(function(d){ return d3.format(",")(d.freq);});
+              l.select(".legendFreq").text(function(d){
+                return d3.format(",")(d.freq);});
 
               // update the percentage column.
               l.select(".legendPerc").text(function(d){ return getLegend(d,nD);});
@@ -252,19 +283,38 @@ d3.json("../Data/transactions-of-3-random-days.json", function(error, data) {
 
       // calculate total frequency by segment for all state.
 
-      var test = Object.keys(fData[1].categories)
       counter = 1
-      var tF = ['Christmas', 'Cooking', 'Cycling', 'Entertainment', 'Garden', 'Home_improvement', 'Kitchen', 'Moving', 'Office', 'Party', 'TV', 'Video', 'Woodwork', 'festival', 'game_night', 'going_outside', 'koningsdag', 'oktoberfest', 'partytent', 'sinterklaas'].map(function(d){
+      console.log(fData, "fData")
+
+
+      function typesToArray(data) {
+        typeList = [];
+        for (i = 0; i < data.length; i++){
+          for (var key in data[i].categories) {
+            if (typeList.indexOf(key) == -1) {
+              typeList.push(key)
+            };
+          };
+        };
+        typeList.sort();
+        return {typeList}
+      };
+
+      typesToArray(fData)
+      console.log(typeList)
+      var tF = typeList.map(function(d){
           return {type:d, freq: d3.sum(fData.map(function(t){
             if (d in t.categories) {
-              console.log(d)
-              console.log(t.categories, counter)
-              counter++;
-              console.log(t.categories[d])
+              // console.log(d)
+              // console.log(t.categories, counter)
+              // counter++;
+              // console.log(t.categories[d], counter)
               return t.categories[d]
             }
             ;}))};
       });
+
+      console.log(tF, "de tF");
 
       // calculate total frequency by state for all segment.
       var sF = fData.map(function(d){return [d.time,d.total];});

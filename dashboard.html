@@ -116,6 +116,7 @@ function dashboard(id, fData){
 
         function mouseout(d){    // utility function to be called on mouseout.
             // reset the pie-chart and legend.
+            console.log(tF)
             pC.update(tF);
             leg.update(tF);
         }
@@ -249,7 +250,7 @@ function dashboard(id, fData){
         leg= legend(tF);  // create the legend.
 }
 </script>
-
+d3.keys(st.categories).map(function(s){ return {type:s, freq:st.categories[s]};});
 <script>
 var freqData=[
 {State:'AL',freq:{low:4786, mid:1319, high:249}}
