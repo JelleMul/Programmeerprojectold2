@@ -28,6 +28,23 @@ img {
   max-height: 30%;
 }
 
+.transactions, .transactions svg {
+  position: absolute;
+}
+
+.transactions svg {
+  width: 60px;
+  height: 20px;
+  padding-right: 100px;
+  font: 10px sans-serif;
+}
+
+.transactions circle {
+  fill: brown;
+  stroke: black;
+  stroke-width: 1.5px;
+}
+
 #wrapper {
   width: 95%;
   height: 500px;

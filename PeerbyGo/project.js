@@ -118,7 +118,6 @@ d3.json("../Data/transactions-of-3-random-days.json", function(error, data) {
           function mouseover(d){  // utility function to be called on mouseover.
               // filter for selected state.
               var st = fData.filter(function(s){ return s.time == d[0];})[0]
-              console.log(st, "st")
               typeList = [];
               for (var key in st.categories) {
                 if (typeList.indexOf(key) == -1) {
@@ -127,17 +126,12 @@ d3.json("../Data/transactions-of-3-random-days.json", function(error, data) {
               };
               typeList.sort();
 
-              console.log(typeList, "typeList")
+
+              console.log(st, "st")
               var nD = typeList.map(function(d){
-                  return {type:d, freq: d3.sum(fData.map(function(t){
-                    if (d in t.categories) {
-                      // console.log(d)
-                      // console.log(t.categories, counter)
-                      // counter++;
-                      return t.categories[d]
-                    };
-                  }))};
-              });
+                  return {type:d, freq: st.categories[d]
+                  }}
+              );
 
               console.log(nD, "nD")
 
@@ -182,6 +176,7 @@ d3.json("../Data/transactions-of-3-random-days.json", function(error, data) {
 
           // create svg for pie chart.
           var piesvg = d3.select(id).append("svg")
+              .attr("id", "piechart")
               .attr("width", pieDim.w).attr("height", pieDim.h).append("g")
               .attr("transform", "translate("+pieDim.w/2+","+pieDim.h/2+")");
 
@@ -199,9 +194,25 @@ d3.json("../Data/transactions-of-3-random-days.json", function(error, data) {
 
           // create function to update pie-chart. This will be used by histogram.
           pC.update = function(nD){
-              piesvg.selectAll("path").data(pie(nD)).transition().duration(500)
-                  .attrTween("d", arcTween);
+            var Parent = document.getElementById("piechart");
+            if (Parent != null) {
+              while(Parent.hasChildNodes())
+              {
+               Parent.removeChild(Parent.firstChild);
+              }
+            };
+
+            var piesvg = d3.select('#piechart')
+                .attr("width", pieDim.w).attr("height", pieDim.h).append("g")
+                .attr("transform", "translate("+pieDim.w/2+","+pieDim.h/2+")");
+
+            // Draw the pie slices.
+            piesvg.selectAll("path").data(pie(nD)).enter().append("path").attr("d", arc)
+                .each(function(d) { this._current = d; })
+                .style("fill", function(d) { return segColor(d.data.type); })
+                .on("mouseover",mouseover).on("mouseout",mouseout)
           }
+
           // Utility function to be called on mouseover a pie slice.
           function mouseover(d){
               // call the update function of histogram with new data.
@@ -280,7 +291,7 @@ d3.json("../Data/transactions-of-3-random-days.json", function(error, data) {
 
               // create the fourth column for each segment.
               tr.append("td").attr("class",'legendPerc')
-                  .text(function(d){ return getLegend(d,lD);});
+                  .text(function(d){ return getLegend(d,nD);});
           }
 
           function getLegend(d,aD){ // Utility function to compute percentage.
@@ -337,16 +348,44 @@ d3.json("../Data/transactions-of-3-random-days.json", function(error, data) {
     // Add the container when the overlay is added to the map.
     overlay.onAdd = function() {
       var layer = d3.select(this.getPanes().overlayLayer).append("div")
-          .attr("class", "stations");
+          .attr("class", "transactions");
 
       // Draw each marker as a separate SVG element.
       // We could use a single SVG, but what size would it have?
       overlay.draw = function() {
         var projection = this.getProjection(),
             padding = 10;
-      };
-    };
 
+        var marker = layer.selectAll("svg")
+          .data(d3.entries(data))
+          .each(transform) // update existing markers
+        .enter().append("svg")
+          .each(transform)
+          .attr("class", "marker");
+
+        // Add a circle.
+        marker.append("image")
+            .attr("r", 4.5)
+            .attr("cx", padding)
+            .attr("cy", padding);
+
+        // Add a label.
+        marker.append("text")
+          .attr('class','mark')
+          .attr('width', 20)
+          .attr('height', 20)
+          .attr("xlink:href",'https://cdn3.iconfinder.com/data/icons/softwaredemo/PNG/24x24/DrawingPin1_Blue.png')
+          .text(function(d) { return d.value.productArchetype.locales.nl_NL[0]; });
+
+        function transform(d) {
+          d = new google.maps.LatLng(d.value.contactInfo.geolocation.lat, d.value.contactInfo.geolocation.lng);
+          d = projection.fromLatLngToDivPixel(d);
+          return d3.select(this)
+              .style("left", (d.x - padding) + "px")
+              .style("top", (d.y - padding) + "px");
+        };
+      };
+    }
     dashboard('#dashboard',timedata);
     // Bind our overlay to the map…
     overlay.setMap(map);
