@@ -11,7 +11,6 @@
 - Maak zoveel mogelijk functies die je called op het moment dat je ze nodig hebt
 
 Voor meer details volgen we de volgende guidelines:
-
-http://primercss.io/guidelines/
-http://www.w3schools.com/html/html5_syntax.asp   
-https://northlandia.wordpress.com/2014/10/23/ten-best-practices-for-coding-with-d3/
+- http://primercss.io/guidelines/
+- http://www.w3schools.com/html/html5_syntax.asp   
+- https://northlandia.wordpress.com/2014/10/23/ten-best-practices-for-coding-with-d3/
