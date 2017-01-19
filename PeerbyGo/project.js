@@ -365,17 +365,17 @@ d3.json("../Data/transactions-of-3-random-days.json", function(error, data) {
 
         // Add a circle.
         marker.append("image")
-            .attr("r", 4.5)
-            .attr("cx", padding)
-            .attr("cy", padding);
+        .attr('class','mark')
+        .attr('width', 20)
+        .attr('height', 20)
+        .attr("xlink:href",'https://cdn3.iconfinder.com/data/icons/softwaredemo/PNG/24x24/DrawingPin1_Blue.png')
 
         // Add a label.
         marker.append("text")
-          .attr('class','mark')
-          .attr('width', 20)
-          .attr('height', 20)
-          .attr("xlink:href",'https://cdn3.iconfinder.com/data/icons/softwaredemo/PNG/24x24/DrawingPin1_Blue.png')
-          .text(function(d) { return d.value.productArchetype.locales.nl_NL[0]; });
+            .attr("x", padding + 7)
+            .attr("y", padding)
+            .attr("dy", ".31em")
+            .text(function(d) { return d.value.productArchetype.locales.nl_NL[0]; });
 
         function transform(d) {
           d = new google.maps.LatLng(d.value.contactInfo.geolocation.lat, d.value.contactInfo.geolocation.lng);
