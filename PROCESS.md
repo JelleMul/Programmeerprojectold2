@@ -26,4 +26,4 @@ Zeer nuttige dag. Het dashboard voorbeeld uit het designdocument kunnen toepasse
 Enkele kleine bugs opgelost, daarnaast vandaag er weinig gedaan, mede door stroomstoring
 
 ## Dag 8
-Bezig geweest om de legenda op de juiste manier aan te passen, nog niet helemaal gelukt, maar op de goede weg.
+Bezig geweest om de legenda op de juiste manier aan te passen, nog niet helemaal gelukt, maar op de goede weg. Hierbij ervoor gezorg dat de input variabel is, en niet per definitie alle categorieën.

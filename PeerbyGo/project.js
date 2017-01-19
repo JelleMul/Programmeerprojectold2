@@ -10,13 +10,12 @@ var timedata =  [{time: "30-07 00:00", categories:{}},
                 {time: "31-07 18:00", categories:{}}]
 
 var map = new google.maps.Map(d3.select("#map").node(), {
-  zoom: 14,
+  zoom: 9,
   zoomcontrol: true,
-  center: new google.maps.LatLng(52.373093, 4.897353),
+  center: new google.maps.LatLng(52.161555, 4.859314),
   mapTypeId: google.maps.MapTypeId.TERRAIN,
   scrollwheel: false
 });
-
 
 d3.json("../Data/transactions-of-3-random-days.json", function(error, data) {
   if (error) throw error;
@@ -60,6 +59,10 @@ d3.json("../Data/transactions-of-3-random-days.json", function(error, data) {
       return sum;
     }
 
+    // function check(obj) {
+    //   if
+    // }
+
     for (i = 0; i < timedata.length; i++) {
       total_transactions[i] = sum(timedata[i].categories)
     }
@@ -69,7 +72,6 @@ d3.json("../Data/transactions-of-3-random-days.json", function(error, data) {
 
       // compute total for each state.
       fData.forEach(function(d){d.total = sum(d.categories)});
-      console.log(fData, "fData")
       // function to handle histogram.
       function histoGram(fD){
           var hG={},    hGDim = {t: 60, r: 0, b: 30, l: 0};
@@ -126,14 +128,18 @@ d3.json("../Data/transactions-of-3-random-days.json", function(error, data) {
               };
               typeList.sort();
 
-
-              console.log(st, "st")
               var nD = typeList.map(function(d){
-                  return {type:d, freq: st.categories[d]
-                  }}
-              );
+                if (st.categories[d] != 0) {
+                  return {type:d, freq: st.categories[d]}
+                }
+              });
 
-              console.log(nD, "nD")
+              for (i = 0; i < nD.length; i++) {
+                if (nD[i] == undefined) {
+                  nD.splice(i, 1);
+                  i--;
+                }
+              }
 
               // call update functions of pie-chart and legend.
               pC.update(nD);
@@ -142,7 +148,6 @@ d3.json("../Data/transactions-of-3-random-days.json", function(error, data) {
 
           function mouseout(d){    // utility function to be called on mouseout.
               // reset the pie-chart and legend.
-
               pC.update(tF);
               leg.update(tF);
           }
@@ -304,8 +309,6 @@ d3.json("../Data/transactions-of-3-random-days.json", function(error, data) {
       // calculate total frequency by segment for all state.
 
       counter = 1
-      console.log(fData, "fData")
-
 
       function typesToArray(data) {
         typeList = [];
@@ -321,7 +324,6 @@ d3.json("../Data/transactions-of-3-random-days.json", function(error, data) {
       };
 
       typesToArray(fData)
-      console.log(typeList)
       var tF = typeList.map(function(d){
           return {type:d, freq: d3.sum(fData.map(function(t){
             if (d in t.categories) {
@@ -333,8 +335,6 @@ d3.json("../Data/transactions-of-3-random-days.json", function(error, data) {
             }
             ;}))};
       });
-
-      console.log(tF, "de tF");
 
       // calculate total frequency by state for all segment.
       var sF = fData.map(function(d){return [d.time,d.total];});
@@ -356,34 +356,65 @@ d3.json("../Data/transactions-of-3-random-days.json", function(error, data) {
         var projection = this.getProjection(),
             padding = 10;
 
+        console.log(data)
         var marker = layer.selectAll("svg")
           .data(d3.entries(data))
           .each(transform) // update existing markers
         .enter().append("svg")
           .each(transform)
-          .attr("class", "marker");
+          .attr("class", "marker")
 
-        // Add a circle.
+        var marker2 = layer.selectAll("svg")
+          .data(d3.entries(data))
+          .each(transform2) // update existing markers
+        .enter().append("svg")
+          .each(transform2)
+          .attr("class", "marker2");
+
+        // Add a image.
         marker.append("image")
         .attr('class','mark')
         .attr('width', 20)
         .attr('height', 20)
-        .attr("xlink:href",'https://cdn3.iconfinder.com/data/icons/softwaredemo/PNG/24x24/DrawingPin1_Blue.png')
+        .attr("xlink:href",'../doc/imageedit_10_7072605565.png')
+
+        marker2.append("image")
+        .attr('class','mark2')
+        .attr('width', 20)
+        .attr('height', 20)
+        .attr("xlink:href",'../doc/rsz_red-pin-no-shadow-clip-art.png')
 
         // Add a label.
         marker.append("text")
-            .attr("x", padding + 7)
-            .attr("y", padding)
-            .attr("dy", ".31em")
-            .text(function(d) { return d.value.productArchetype.locales.nl_NL[0]; });
+          .attr("x", padding + 7)
+          .attr("y", padding)
+          .attr("dy", ".31em")
+          .text(function(d) { return d.value.productArchetype.locales.nl_NL[0]; });
+
+        marker2.append("text")
+          .attr("x", padding + 7)
+          .attr("y", padding)
+          .attr("dy", ".31em")
+          .text(function(d) { return d.value.productArchetype.locales.nl_NL[0]; });
 
         function transform(d) {
-          d = new google.maps.LatLng(d.value.contactInfo.geolocation.lat, d.value.contactInfo.geolocation.lng);
-          d = projection.fromLatLngToDivPixel(d);
+          e = new google.maps.LatLng(d.value.contactInfo.geolocation.lat, d.value.contactInfo.geolocation.lng);
+          e = projection.fromLatLngToDivPixel(e);
           return d3.select(this)
-              .style("left", (d.x - padding) + "px")
-              .style("top", (d.y - padding) + "px");
+              .style("left", (e.x - padding) + "px")
+              .style("top", (e.y - padding) + "px")
         };
+
+        function transform2(d) {
+          f = new google.maps.LatLng(d.value.suppliers[0].user.geolocation.lat, d.value.suppliers[0].user.geolocation.lng);
+          f = projection.fromLatLngToDivPixel(f);
+          console.log(this)
+          return d3.select(this)
+            .style("left", (f.x - padding) + "px")
+            .style("top", (f.y - padding) + "px");
+        };
+
+
       };
     }
     dashboard('#dashboard',timedata);
