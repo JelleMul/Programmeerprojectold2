@@ -118,7 +118,7 @@ d3.json("../Data/transactions-of-3-random-days.json", function(error, data) {
           function mouseover(d){  // utility function to be called on mouseover.
               // filter for selected state.
               var st = fData.filter(function(s){ return s.time == d[0];})[0]
-              console.log(st)
+              console.log(st, "st")
               typeList = [];
               for (var key in st.categories) {
                 if (typeList.indexOf(key) == -1) {
@@ -143,14 +143,14 @@ d3.json("../Data/transactions-of-3-random-days.json", function(error, data) {
 
               // call update functions of pie-chart and legend.
               pC.update(nD);
-              var leg= legend(nD);
+              leg.update(nD);
           }
 
           function mouseout(d){    // utility function to be called on mouseout.
               // reset the pie-chart and legend.
 
               pC.update(tF);
-              var leg= legend(tF);
+              leg.update(tF);
           }
 
           // create function to update the bars. This will be used by pie-chart.
@@ -229,13 +229,6 @@ d3.json("../Data/transactions-of-3-random-days.json", function(error, data) {
 
       // function to handle legend.
       function legend(lD){
-          var Parent = document.getElementById("legenda");
-          if (Parent != null) {
-            while(Parent.hasChildNodes())
-            {
-             Parent.removeChild(Parent.firstChild);
-            }
-          };
           var leg = {};
 
           // create table for legend.
@@ -247,7 +240,7 @@ d3.json("../Data/transactions-of-3-random-days.json", function(error, data) {
           // create the first column for each segment.
           tr.append("td").append("svg").attr("width", '16').attr("height", '16').append("rect")
               .attr("width", '16').attr("height", '16')
-  			.attr("fill",function(d){ return segColor(d.type); });
+  			      .attr("fill",function(d){ return segColor(d.type); });
 
           // create the second column for each segment.
           tr.append("td").attr("class",'LegendName')
@@ -263,15 +256,31 @@ d3.json("../Data/transactions-of-3-random-days.json", function(error, data) {
 
           // Utility function to be used to update the legend.
           leg.update = function(nD){
+              var Parent = document.getElementById("legenda");
+              if (Parent != null) {
+                while(Parent.hasChildNodes())
+                {
+                 Parent.removeChild(Parent.firstChild);
+                }
+              };
               // update the data attached to the row elements.
-              var l = legend.select("tbody").selectAll("tr").data(nD);
+              var tr = legend.append("tbody").selectAll("tr").data(nD).enter().append("tr");
 
-              // update the frequencies.
-              l.select(".legendFreq").text(function(d){
-                return d3.format(",")(d.freq);});
+              tr.append("td").append("svg").attr("width", '16').attr("height", '16').append("rect")
+                  .attr("width", '16').attr("height", '16')
+      			      .attr("fill",function(d){ return segColor(d.type); });
 
-              // update the percentage column.
-              l.select(".legendPerc").text(function(d){ return getLegend(d,nD);});
+              // create the second column for each segment.
+              tr.append("td").attr("class",'LegendName')
+                  .text(function(d){ return d.type;});
+
+              // create the third column for each segment.
+              tr.append("td").attr("class",'legendFreq')
+                  .text(function(d){ return d3.format(",")(d.freq);});
+
+              // create the fourth column for each segment.
+              tr.append("td").attr("class",'legendPerc')
+                  .text(function(d){ return getLegend(d,lD);});
           }
 
           function getLegend(d,aD){ // Utility function to compute percentage.
