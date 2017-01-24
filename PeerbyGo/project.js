@@ -249,14 +249,15 @@ d3.json("../Data/transactions-of-3-random-days.json", function(error, data) {
               return function(t) { return arc(i(t));    };
           }
           return pC;
+
       }
 
       // function to handle legend.
       function legend(lD){
           var leg = {};
-
+          var tablediv = d3.select(id).append("div").attr('id', 'tablediv');
           // create table for legend.
-          var legend = d3.select(id).append("table").attr('id', 'legenda').attr('class','legend');
+          var legend = d3.select("#tablediv").append("table").attr('id', 'legenda').attr('class','legend');
 
           // create one row per segment.s
           var tr = legend.append("tbody").selectAll("tr").data(lD).enter().append("tr");
@@ -312,6 +313,7 @@ d3.json("../Data/transactions-of-3-random-days.json", function(error, data) {
           }
 
           return leg;
+
       }
 
       // calculate total frequency by segment for all state.

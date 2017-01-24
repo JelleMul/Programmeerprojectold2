@@ -42,4 +42,4 @@ In het weekend en vandaag ziek, dus niks gedaan ivm de hoofdpijn
 ## Dag 12
 De kaart aangepast zodat ik nu onderscheid kan maken tussen aankomst en vertrekpunt, daarnaast lijnen getrokken tussen aankomst en vertrekpunten. Had hierbij wat problemen bij het transformeren van de verschillende coördinaten. Daarnaast buttons aangemaakt om in te zoomen op de specifieke steden.
 
-Morgen ervoor zorgen dat de drop-down ook echt functioneel is. 
+Morgen ervoor zorgen dat de drop-down ook echt functioneel is. Daarnaast bedacht dat het mooi zou zijn om in plaats van lijne pijlen te maken, zodat meteen duidelijk is wat vertrek en aankomstpunt is.
