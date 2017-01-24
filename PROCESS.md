@@ -27,3 +27,19 @@ Enkele kleine bugs opgelost, daarnaast vandaag er weinig gedaan, mede door stroo
 
 ## Dag 8
 Bezig geweest om de legenda op de juiste manier aan te passen, nog niet helemaal gelukt, maar op de goede weg. Hierbij ervoor gezorg dat de input variabel is, en niet per definitie alle categorieën.
+
+## Dag 9
+legenda is nu volledig werkend, daarnaast al mijn punten op de kaart gekregen, echter nog niet gelukt om een onderscheid te maken tussen de aankomst en vertrekpunten. Om dit op te lossen, moet ik niet voor elk punt een nieuw svg element aanmaken, maar ze allemaal toevoegen aan een al bestaand svg bestand.
+
+## Dag 10
+bij presentaties:
+idee: buttuns maken waarbij je uit een stad kan kiezen waarop de kaart vervolgens inzoomed
+Daarnaast nog een dropdown menu gemaakt, maar deze is nog niet functioneel.
+
+## Dag 11
+In het weekend en vandaag ziek, dus niks gedaan ivm de hoofdpijn
+
+## Dag 12
+De kaart aangepast zodat ik nu onderscheid kan maken tussen aankomst en vertrekpunt, daarnaast lijnen getrokken tussen aankomst en vertrekpunten. Had hierbij wat problemen bij het transformeren van de verschillende coördinaten. Daarnaast buttons aangemaakt om in te zoomen op de specifieke steden.
+
+Morgen ervoor zorgen dat de drop-down ook echt functioneel is. 

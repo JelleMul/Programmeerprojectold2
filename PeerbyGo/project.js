@@ -12,10 +12,18 @@ var timedata =  [{time: "30-07 00:00", categories:{}},
 var map = new google.maps.Map(d3.select("#map").node(), {
   zoom: 9,
   zoomcontrol: true,
-  center: new google.maps.LatLng(52.161555, 4.859314),
+  center: {lat:52.161555, lng: 4.859314},
   mapTypeId: google.maps.MapTypeId.TERRAIN,
   scrollwheel: false
 });
+
+function Zoom(lat, lng, zoom) {
+  var myOptions = {
+    zoom: zoom,
+    center: {lat:lat, lng: lng}
+  }
+  map.setOptions(myOptions);
+}
 
 d3.json("../Data/transactions-of-3-random-days.json", function(error, data) {
   if (error) throw error;
@@ -343,80 +351,133 @@ d3.json("../Data/transactions-of-3-random-days.json", function(error, data) {
           pC = pieChart(tF), // create the pie-chart.
           leg= legend(tF);  // create the legend.
     }
-    var overlay = new google.maps.OverlayView();
 
+    var bounds = new google.maps.LatLngBounds();
+    d3.entries(data).forEach(function(d){
+      bounds.extend(d.value.lat_lng = new google.maps.LatLng(d.value.contactInfo.geolocation.lat, d.value.contactInfo.geolocation.lng));
+      bounds.extend(d.value.lat_lng_supp = new google.maps.LatLng(d.value.suppliers[0].user.geolocation.lat, d.value.suppliers[0].user.geolocation.lng));
+    });
+    map.fitBounds(bounds);
+
+    var overlay = new google.maps.OverlayView(),
+        r = 4.5,
+        padding = r*2;
     // Add the container when the overlay is added to the map.
     overlay.onAdd = function() {
-      var layer = d3.select(this.getPanes().overlayLayer).append("div")
-          .attr("class", "transactions");
-
-      // Draw each marker as a separate SVG element.
-      // We could use a single SVG, but what size would it have?
-      overlay.draw = function() {
+      var layer = d3.select(this.getPanes().overlayMouseTarget)
+          .append("svg")
+          .attr('class','transactions');
+      overlay.draw = function(){
         var projection = this.getProjection(),
-            padding = 10;
+            sw = projection.fromLatLngToDivPixel(bounds.getSouthWest()),
+            ne = projection.fromLatLngToDivPixel(bounds.getNorthEast());
+        // extend the boundaries so that markers on the edge aren't cut in half
+        sw.x -= padding;
+        sw.y += padding;
+        ne.x += padding;
+        ne.y -= padding;
 
-        console.log(data)
-        var marker = layer.selectAll("svg")
+        d3.select('.transactions')
+          .attr('width',(ne.x - sw.x) + 'px')
+          .attr('height',(sw.y - ne.y) + 'px')
+          .style('position','absolute')
+          .style('left',sw.x+'px')
+          .style('top',ne.y+'px');
+
+        var line = layer.selectAll('.line')
           .data(d3.entries(data))
-          .each(transform) // update existing markers
-        .enter().append("svg")
+          .each(transform3)
+          .each(transform4)
+        .enter().append('line')
+          .attr('class','line')
+          .attr('x1', function(d) {
+            d = projection.fromLatLngToDivPixel(d.value.lat_lng_supp);
+            return d.x-sw.x;
+          })
+          .attr('y1', function(d) {
+            d = projection.fromLatLngToDivPixel(d.value.lat_lng_supp);
+            return d.y-sw.y;
+          })
+          .attr('x2', function(d) {
+            d = projection.fromLatLngToDivPixel(d.value.lat_lng);
+            return d.x-sw.x;
+          })
+          .attr('y2', function(d) {
+            d = projection.fromLatLngToDivPixel(d.value.lat_lng);
+            return d.y-sw.y;
+          })
+          .transition()
+          .duration(1500)
+          .attr('stroke-width', 4)
+          .attr('stroke', "black");
+
+        var marker = layer.selectAll('.marker')
+          .data(d3.entries(data))
           .each(transform)
-          .attr("class", "marker")
+        .enter().append('circle')
+          .attr('class','marker')
+          .attr('r',r)
+          .attr('cx',function(d) {
+            d = projection.fromLatLngToDivPixel(d.value.lat_lng);
+            return d.x-sw.x;
+          })
+          .attr('cy',function(d) {
+            d = projection.fromLatLngToDivPixel(d.value.lat_lng);
+            return d.y-ne.y;
+          })
+          .append('title').text(function(d){
+            return [d.value.productArchetype.locales.nl_NL[0]];
+          });
 
-        var marker2 = layer.selectAll("svg")
+        var marker2 = layer.selectAll('.marker2')
           .data(d3.entries(data))
-          .each(transform2) // update existing markers
-        .enter().append("svg")
           .each(transform2)
-          .attr("class", "marker2");
-
-        // Add a image.
-        marker.append("image")
-        .attr('class','mark')
-        .attr('width', 20)
-        .attr('height', 20)
-        .attr("xlink:href",'../doc/imageedit_10_7072605565.png')
-
-        marker2.append("image")
-        .attr('class','mark2')
-        .attr('width', 20)
-        .attr('height', 20)
-        .attr("xlink:href",'../doc/rsz_red-pin-no-shadow-clip-art.png')
-
-        // Add a label.
-        marker.append("text")
-          .attr("x", padding + 7)
-          .attr("y", padding)
-          .attr("dy", ".31em")
-          .text(function(d) { return d.value.productArchetype.locales.nl_NL[0]; });
-
-        marker2.append("text")
-          .attr("x", padding + 7)
-          .attr("y", padding)
-          .attr("dy", ".31em")
-          .text(function(d) { return d.value.productArchetype.locales.nl_NL[0]; });
+        .enter().append('circle')
+          .attr('class','marker2')
+          .attr('r',r)
+          .attr('cx',function(d) {
+            d = projection.fromLatLngToDivPixel(d.value.lat_lng_supp);
+            return d.x-sw.x;
+          })
+          .attr('cy',function(d) {
+            d = projection.fromLatLngToDivPixel(d.value.lat_lng_supp);
+            return d.y-ne.y;
+          })
+          .append('title').text(function(d){
+            return [d.value.productArchetype.locales.nl_NL[0]];
+          });
 
         function transform(d) {
-          e = new google.maps.LatLng(d.value.contactInfo.geolocation.lat, d.value.contactInfo.geolocation.lng);
-          e = projection.fromLatLngToDivPixel(e);
+          d = projection.fromLatLngToDivPixel(d.value.lat_lng);
           return d3.select(this)
-              .style("left", (e.x - padding) + "px")
-              .style("top", (e.y - padding) + "px")
-        };
+            .attr('cx',d.x-sw.x)
+            .attr('cy',d.y-ne.y);
+        }
 
         function transform2(d) {
-          f = new google.maps.LatLng(d.value.suppliers[0].user.geolocation.lat, d.value.suppliers[0].user.geolocation.lng);
-          f = projection.fromLatLngToDivPixel(f);
-          console.log(this)
+          d = projection.fromLatLngToDivPixel(d.value.lat_lng_supp);
           return d3.select(this)
-            .style("left", (f.x - padding) + "px")
-            .style("top", (f.y - padding) + "px");
-        };
+            .attr('cx',d.x-sw.x)
+            .attr('cy',d.y-ne.y);
+        }
 
+        function transform3(d) {
+          d = projection.fromLatLngToDivPixel(d.value.lat_lng_supp);
+          return d3.select(this)
+            .attr('x1',d.x-sw.x)
+            .attr('y1',d.y-ne.y);
+        }
+
+        function transform4(d) {
+          d = projection.fromLatLngToDivPixel(d.value.lat_lng);
+          return d3.select(this)
+            .attr('x2',d.x-sw.x)
+            .attr('y2',d.y-ne.y);
+        }
 
       };
-    }
+    };
+
     dashboard('#dashboard',timedata);
     // Bind our overlay to the map…
     overlay.setMap(map);
@@ -434,7 +495,6 @@ function myFunction() {
 // Close the dropdown menu if the user clicks outside of it
 window.onclick = function(event) {
   if (!event.target.matches('.dropbtn')) {
-
     var dropdowns = document.getElementsByClassName("dropdown-content");
     var i;
     for (i = 0; i < dropdowns.length; i++) {
