@@ -238,13 +238,15 @@ d3.json("../Data/transactions-of-3-random-days.json", function(error, data) {
                 }
                   return [v.time,v.categories[d.data.type]];}),segColor(d.data.type));
 
-              leg.highlight(d.data.type)
+              leg.highlight(d.data.type, "#3e8e41")
           }
           //Utility function to be called on mouseout a pie slice.
           function mouseout(d){
               // call the update function of histogram with all data.
               hG.update(fData.map(function(v){
                   return [v.time,v.total];}), barColor);
+
+              leg.highlight(d.data.type, "#5998E5")
           }
           // Animating the pie-slice requiring a custom function which specifies
           // how the intermediate paths should be drawn.
@@ -313,8 +315,11 @@ d3.json("../Data/transactions-of-3-random-days.json", function(error, data) {
                   .text(function(d){ return getLegend(d,nD);});
           }
 
-          leg.highlight = function(categorie){
-            console.log(categorie)
+          leg.highlight = function(categorie, color){
+            d3.selectAll("tr").filter(function() {
+              return this.innerText.startsWith(categorie)
+              })
+              .style("background-color", color)
           }
 
           function getLegend(d,aD){ // Utility function to compute percentage.
@@ -406,6 +411,7 @@ d3.json("../Data/transactions-of-3-random-days.json", function(error, data) {
           // call update functions of pie-chart and legend.
           pC.update(nD);
           leg.update(nD);
+          transmap.update(data, selection.value)
         });
       selector.selectAll("option")
         .data(elements)
@@ -419,6 +425,8 @@ d3.json("../Data/transactions-of-3-random-days.json", function(error, data) {
     }
 
     function TransactionMap(data) {
+      transmap = {}
+      console.log(data)
       var bounds = new google.maps.LatLngBounds();
       d3.entries(data).forEach(function(d){
         bounds.extend(d.value.lat_lng = new google.maps.LatLng(d.value.contactInfo.geolocation.lat, d.value.contactInfo.geolocation.lng));
@@ -544,6 +552,22 @@ d3.json("../Data/transactions-of-3-random-days.json", function(error, data) {
 
         };
       };
+
+      transmap.update = function(data, timestamp) {
+        timestamp = ([timestamp.slice(0, 0), "2017-", timestamp.slice(0)].join('').replace(' ','T').split('T'))
+        timestamp[1] = timestamp[1].concat(":00.000Z")
+        timestamp[0] = timestamp[0].split('-')
+        timestamp = timestamp[0][0].concat(timestamp[0][2].concat(timestamp[0][1].concat(timestamp[1])))
+        console.log(timestamp)
+        for(i = 0; i < data.length; i++) {
+          k = new Date(data[i].delivery.start)
+        }
+        d3.selectAll(".line").remove()
+        d3.selectAll(".marker").remove()
+        d3.selectAll(".marker2").remove()
+
+      }
+
       overlay.setMap(map);
     };
 
