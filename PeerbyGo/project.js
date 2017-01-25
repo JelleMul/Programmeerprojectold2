@@ -23,7 +23,7 @@ function Zoom(lat, lng, zoom) {
     center: {lat:lat, lng: lng}
   }
   map.setOptions(myOptions);
-}
+};
 
 d3.json("../Data/transactions-of-3-random-days.json", function(error, data) {
   if (error) throw error;
@@ -52,6 +52,9 @@ d3.json("../Data/transactions-of-3-random-days.json", function(error, data) {
         }
       }
     }
+    function Filter(length, timestamp) {
+      console.log("hoi")
+    };
 
     // compute total for each state.
 
@@ -126,7 +129,7 @@ d3.json("../Data/transactions-of-3-random-days.json", function(error, data) {
               .attr("text-anchor", "middle");
 
           function mouseover(d){  // utility function to be called on mouseover.
-              // filter for selected state.
+              // filter for selected timeblock.
               var st = fData.filter(function(s){ return s.time == d[0];})[0]
               typeList = [];
               for (var key in st.categories) {
@@ -136,7 +139,7 @@ d3.json("../Data/transactions-of-3-random-days.json", function(error, data) {
               };
               typeList.sort();
 
-              var nD = typeList.map(function(d){
+              var nD = typeList.map(function(d) {
                 if (st.categories[d] != 0) {
                   return {type:d, freq: st.categories[d]}
                 }
@@ -234,6 +237,8 @@ d3.json("../Data/transactions-of-3-random-days.json", function(error, data) {
                   v.categories[d.data.type] = 0
                 }
                   return [v.time,v.categories[d.data.type]];}),segColor(d.data.type));
+
+              leg.highlight(d.data.type)
           }
           //Utility function to be called on mouseout a pie slice.
           function mouseout(d){
@@ -255,7 +260,7 @@ d3.json("../Data/transactions-of-3-random-days.json", function(error, data) {
       // function to handle legend.
       function legend(lD){
           var leg = {};
-          var tablediv = d3.select(id).append("div").attr('id', 'tablediv');
+
           // create table for legend.
           var legend = d3.select("#tablediv").append("table").attr('id', 'legenda').attr('class','legend');
 
@@ -308,6 +313,10 @@ d3.json("../Data/transactions-of-3-random-days.json", function(error, data) {
                   .text(function(d){ return getLegend(d,nD);});
           }
 
+          leg.highlight = function(categorie){
+            console.log(categorie)
+          }
+
           function getLegend(d,aD){ // Utility function to compute percentage.
               return d3.format("%")(d.freq/d3.sum(aD.map(function(v){ return v.freq; })));
           }
@@ -352,137 +361,197 @@ d3.json("../Data/transactions-of-3-random-days.json", function(error, data) {
       var hG = histoGram(sF), // create the histogram.
           pC = pieChart(tF), // create the pie-chart.
           leg= legend(tF);  // create the legend.
+
+      var elements = []
+      for (i = 0; i < timedata.length; i++) {
+        elements.push(timedata[i].time)
+      }
+      var selection = elements[0];
+
+      var selector = d3.select(".dropdown")
+      	.append("select")
+      	.attr("id","dropdown")
+      	.on("change", function(d){
+          selection = document.getElementById("dropdown");
+          console.log(selection.value)
+          console.log(timedata)
+          d = []
+          for (i = 0; i < timedata.length; i++) {
+            if (timedata[i].time == selection.value) {
+              d.push(selection.value, timedata[i].total)
+            }
+          }
+          console.log(d)
+          var st = fData.filter(function(s){ return s.time == d[0];})[0]
+          typeList = [];
+          for (var key in st.categories) {
+            if (typeList.indexOf(key) == -1) {
+              typeList.push(key)
+            };
+          };
+          typeList.sort();
+
+          var nD = typeList.map(function(d) {
+            if (st.categories[d] != 0) {
+              return {type:d, freq: st.categories[d]}
+            }
+          });
+
+          for (i = 0; i < nD.length; i++) {
+            if (nD[i] == undefined) {
+              nD.splice(i, 1);
+              i--;
+            }
+          }
+          // call update functions of pie-chart and legend.
+          pC.update(nD);
+          leg.update(nD);
+        });
+      selector.selectAll("option")
+        .data(elements)
+        .enter().append("option")
+        .attr("value", function(d){
+          return d;
+        })
+        .text(function(d){
+          return d;
+        })
     }
 
-    var bounds = new google.maps.LatLngBounds();
-    d3.entries(data).forEach(function(d){
-      bounds.extend(d.value.lat_lng = new google.maps.LatLng(d.value.contactInfo.geolocation.lat, d.value.contactInfo.geolocation.lng));
-      bounds.extend(d.value.lat_lng_supp = new google.maps.LatLng(d.value.suppliers[0].user.geolocation.lat, d.value.suppliers[0].user.geolocation.lng));
-    });
-    map.fitBounds(bounds);
+    function TransactionMap(data) {
+      var bounds = new google.maps.LatLngBounds();
+      d3.entries(data).forEach(function(d){
+        bounds.extend(d.value.lat_lng = new google.maps.LatLng(d.value.contactInfo.geolocation.lat, d.value.contactInfo.geolocation.lng));
+        bounds.extend(d.value.lat_lng_supp = new google.maps.LatLng(d.value.suppliers[0].user.geolocation.lat, d.value.suppliers[0].user.geolocation.lng));
+      });
+      map.fitBounds(bounds);
 
-    var overlay = new google.maps.OverlayView(),
-        r = 4.5,
-        padding = r*2;
-    // Add the container when the overlay is added to the map.
-    overlay.onAdd = function() {
-      var layer = d3.select(this.getPanes().overlayMouseTarget)
-          .append("svg")
-          .attr('class','transactions');
-      overlay.draw = function(){
-        var projection = this.getProjection(),
-            sw = projection.fromLatLngToDivPixel(bounds.getSouthWest()),
-            ne = projection.fromLatLngToDivPixel(bounds.getNorthEast());
-        // extend the boundaries so that markers on the edge aren't cut in half
-        sw.x -= padding;
-        sw.y += padding;
-        ne.x += padding;
-        ne.y -= padding;
+      var overlay = new google.maps.OverlayView(),
+          r = 4.5,
+          padding = r*2;
+      // Add the container when the overlay is added to the map.
+      overlay.onAdd = function() {
+        var layer = d3.select(this.getPanes().overlayMouseTarget)
+            .append("svg")
+            .attr('class','transactions');
+        overlay.draw = function(){
+          var projection = this.getProjection(),
+              sw = projection.fromLatLngToDivPixel(bounds.getSouthWest()),
+              ne = projection.fromLatLngToDivPixel(bounds.getNorthEast());
+          // extend the boundaries so that markers on the edge aren't cut in half
+          sw.x -= padding;
+          sw.y += padding;
+          ne.x += padding;
+          ne.y -= padding;
 
-        d3.select('.transactions')
-          .attr('width',(ne.x - sw.x) + 'px')
-          .attr('height',(sw.y - ne.y) + 'px')
-          .style('position','absolute')
-          .style('left',sw.x+'px')
-          .style('top',ne.y+'px');
+          d3.select('.transactions')
+            .attr('width',(ne.x - sw.x) + 'px')
+            .attr('height',(sw.y - ne.y) + 'px')
+            .style('position','absolute')
+            .style('left',sw.x+'px')
+            .style('top',ne.y+'px');
 
-        var line = layer.selectAll('.line')
-          .data(d3.entries(data))
-          .each(transform3)
-          .each(transform4)
-        .enter().append('line')
-          .attr('class','line')
-          .attr('x1', function(d) {
-            d = projection.fromLatLngToDivPixel(d.value.lat_lng_supp);
-            return d.x-sw.x;
-          })
-          .attr('y1', function(d) {
-            d = projection.fromLatLngToDivPixel(d.value.lat_lng_supp);
-            return d.y-sw.y;
-          })
-          .attr('x2', function(d) {
+          var line = layer.selectAll('.line')
+            .data(d3.entries(data))
+            .each(transform3)
+            .each(transform4)
+          .enter().append('line')
+            .attr('class','line')
+            .attr('x1', function(d) {
+              d = projection.fromLatLngToDivPixel(d.value.lat_lng_supp);
+              return d.x-sw.x;
+            })
+            .attr('y1', function(d) {
+              d = projection.fromLatLngToDivPixel(d.value.lat_lng_supp);
+              return d.y-ne.y;
+            })
+            .attr('x2', function(d) {
+              d = projection.fromLatLngToDivPixel(d.value.lat_lng);
+              return d.x-sw.x;
+            })
+            .attr('y2', function(d) {
+              d = projection.fromLatLngToDivPixel(d.value.lat_lng);
+              return d.y-ne.y;
+            })
+            .transition()
+              .duration(6000)
+            .attr('stroke-width', 2)
+            .attr('stroke', "black");
+
+          var marker = layer.selectAll('.marker')
+            .data(d3.entries(data))
+            .each(transform)
+          .enter().append('circle')
+            .attr('class','marker')
+            .attr('r',r)
+            .attr('cx',function(d) {
+              d = projection.fromLatLngToDivPixel(d.value.lat_lng);
+              return d.x-sw.x;
+            })
+            .attr('cy',function(d) {
+              d = projection.fromLatLngToDivPixel(d.value.lat_lng);
+              return d.y-ne.y;
+            })
+            .append('title').text(function(d){
+              return [d.value.productArchetype.locales.nl_NL[0]];
+            });
+
+          var marker2 = layer.selectAll('.marker2')
+            .data(d3.entries(data))
+            .each(transform2)
+          .enter().append('circle')
+            .attr('class','marker2')
+            .attr('r',r)
+            .attr('cx',function(d) {
+              d = projection.fromLatLngToDivPixel(d.value.lat_lng_supp);
+              return d.x-sw.x;
+            })
+            .attr('cy',function(d) {
+              d = projection.fromLatLngToDivPixel(d.value.lat_lng_supp);
+              return d.y-ne.y;
+            })
+            .append('title').text(function(d){
+              return [d.value.productArchetype.locales.nl_NL[0]];
+            });
+
+          function transform(d) {
             d = projection.fromLatLngToDivPixel(d.value.lat_lng);
-            return d.x-sw.x;
-          })
-          .attr('y2', function(d) {
-            d = projection.fromLatLngToDivPixel(d.value.lat_lng);
-            return d.y-sw.y;
-          })
-          .transition()
-          .duration(1500)
-          .attr('stroke-width', 4)
-          .attr('stroke', "black");
+            return d3.select(this)
+              .attr('cx',d.x-sw.x)
+              .attr('cy',d.y-ne.y);
+          }
 
-        var marker = layer.selectAll('.marker')
-          .data(d3.entries(data))
-          .each(transform)
-        .enter().append('circle')
-          .attr('class','marker')
-          .attr('r',r)
-          .attr('cx',function(d) {
-            d = projection.fromLatLngToDivPixel(d.value.lat_lng);
-            return d.x-sw.x;
-          })
-          .attr('cy',function(d) {
-            d = projection.fromLatLngToDivPixel(d.value.lat_lng);
-            return d.y-ne.y;
-          })
-          .append('title').text(function(d){
-            return [d.value.productArchetype.locales.nl_NL[0]];
-          });
-
-        var marker2 = layer.selectAll('.marker2')
-          .data(d3.entries(data))
-          .each(transform2)
-        .enter().append('circle')
-          .attr('class','marker2')
-          .attr('r',r)
-          .attr('cx',function(d) {
+          function transform2(d) {
             d = projection.fromLatLngToDivPixel(d.value.lat_lng_supp);
-            return d.x-sw.x;
-          })
-          .attr('cy',function(d) {
+            return d3.select(this)
+              .attr('cx',d.x-sw.x)
+              .attr('cy',d.y-ne.y);
+          }
+
+          function transform3(d) {
             d = projection.fromLatLngToDivPixel(d.value.lat_lng_supp);
-            return d.y-ne.y;
-          })
-          .append('title').text(function(d){
-            return [d.value.productArchetype.locales.nl_NL[0]];
-          });
+            return d3.select(this)
+              .attr('x1',d.x-sw.x)
+              .attr('y1',d.y-ne.y);
+          }
 
-        function transform(d) {
-          d = projection.fromLatLngToDivPixel(d.value.lat_lng);
-          return d3.select(this)
-            .attr('cx',d.x-sw.x)
-            .attr('cy',d.y-ne.y);
-        }
+          function transform4(d) {
+            d = projection.fromLatLngToDivPixel(d.value.lat_lng);
+            return d3.select(this)
+              .attr('x2',d.x-sw.x)
+              .attr('y2',d.y-ne.y);
+          }
 
-        function transform2(d) {
-          d = projection.fromLatLngToDivPixel(d.value.lat_lng_supp);
-          return d3.select(this)
-            .attr('cx',d.x-sw.x)
-            .attr('cy',d.y-ne.y);
-        }
-
-        function transform3(d) {
-          d = projection.fromLatLngToDivPixel(d.value.lat_lng_supp);
-          return d3.select(this)
-            .attr('x1',d.x-sw.x)
-            .attr('y1',d.y-ne.y);
-        }
-
-        function transform4(d) {
-          d = projection.fromLatLngToDivPixel(d.value.lat_lng);
-          return d3.select(this)
-            .attr('x2',d.x-sw.x)
-            .attr('y2',d.y-ne.y);
-        }
-
+        };
       };
+      overlay.setMap(map);
     };
+
+    TransactionMap(data);
 
     dashboard('#dashboard',timedata);
     // Bind our overlay to the map…
-    overlay.setMap(map);
+
 
     /* When the user clicks on the button,
     toggle between hiding and showing the dropdown content */

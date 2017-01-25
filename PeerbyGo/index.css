@@ -31,17 +31,17 @@ button:hover {
 }
 
 #container {
-  width: 900px;
-  height: 100%;
+  width: 1450px;
+  height: 1200px;
   margin: auto;
   background-color: rgb(89,152,229)
 }
 
 #map {
-  width: 95%;
+  width: 70%;
   height: 500px;
   background-color: grey;
-  margin: auto;
+  float: right;
   margin-left: 25px;
   margin-right: 25px;
   margin-top: 25px;
@@ -76,7 +76,7 @@ img {
 }
 
 /* Dropdown Button */
-.dropbtn {
+.dropdown {
   background-color: lightgreen;
   color: black;
   padding: 16px;
@@ -86,7 +86,7 @@ img {
 }
 
 /* Dropdown button on hover & focus */
-.dropbtn:hover, .dropbtn:focus {
+.dropdown:hover, .dropdown:focus {
   background-color: #3e8e41;
 }
 
@@ -121,22 +121,21 @@ img {
 /* Show the dropdown menu (use JS to add this class to the .dropdown-content container when the user clicks on the dropdown button) */
 .show {display:block;}
 
-#wrapper {
-  width: 95%;
-  height: 500px;
+#dashboard {
+  float: right;
   margin-top: 20px;
   margin-left: 25px;
-  margin-right: 25px;
+  margin-right: 125px;
 }
 
-#dashboard {
-  margin-top: 20px;
+#tablediv {
   margin-left: 25px;
-  margin-right: 25px;
+  margin-top: 25px;
+  float: left;
 }
 
 path {  stroke: #fff; }
-path:hover {  opacity:0.9; }
+path:hover {  opacity:0.8; }
 rect:hover {  fill:blue; }
 .axis {  font: 10px sans-serif; }
 .legend tr{    border-bottom:1px solid grey; }
