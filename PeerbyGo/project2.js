@@ -381,7 +381,6 @@ d3.json("../Data/transactions-of-3-random-days.json", function(error, data) {
           leg= legend(tF);  // create the legend.
 
       var elements = []
-      elements.push("All timestamps")
       for (i = 0; i < timedata.length; i++) {
         elements.push(timedata[i].time)
       }
@@ -394,45 +393,38 @@ d3.json("../Data/transactions-of-3-random-days.json", function(error, data) {
           selection = document.getElementById("dropdown");
           console.log(selection.value)
           console.log(timedata)
-          if (selection.value != "All timestamps") {
-            d = []
-            for (i = 0; i < timedata.length; i++) {
-              if (timedata[i].time == selection.value) {
-                d.push(selection.value, timedata[i].total)
-              }
+          d = []
+          for (i = 0; i < timedata.length; i++) {
+            if (timedata[i].time == selection.value) {
+              d.push(selection.value, timedata[i].total)
             }
-
-            console.log(d)
-            var st = fData.filter(function(s){ return s.time == d[0];})[0]
-            typeList = [];
-            for (var key in st.categories) {
-              if (typeList.indexOf(key) == -1) {
-                typeList.push(key)
-              };
-            };
-            typeList.sort();
-
-            var nD = typeList.map(function(d) {
-              if (st.categories[d] != 0) {
-                return {type:d, freq: st.categories[d]}
-              }
-            });
-
-            for (i = 0; i < nD.length; i++) {
-              if (nD[i] == undefined) {
-                nD.splice(i, 1);
-                i--;
-              }
-            }
-            // call update functions of pie-chart and legend.
-            pC.update(nD);
-            leg.update(nD);
-            transmap.update(data, selection.value)
-          } else {
-            pC.update(tF);
-            leg.update(tF);
-            transmap.update(data, selection.value)
           }
+          console.log(d)
+          var st = fData.filter(function(s){ return s.time == d[0];})[0]
+          typeList = [];
+          for (var key in st.categories) {
+            if (typeList.indexOf(key) == -1) {
+              typeList.push(key)
+            };
+          };
+          typeList.sort();
+
+          var nD = typeList.map(function(d) {
+            if (st.categories[d] != 0) {
+              return {type:d, freq: st.categories[d]}
+            }
+          });
+
+          for (i = 0; i < nD.length; i++) {
+            if (nD[i] == undefined) {
+              nD.splice(i, 1);
+              i--;
+            }
+          }
+          // call update functions of pie-chart and legend.
+          pC.update(nD);
+          leg.update(nD);
+          transmap.update(data, selection.value)
         });
       selector.selectAll("option")
         .data(elements)
@@ -447,177 +439,108 @@ d3.json("../Data/transactions-of-3-random-days.json", function(error, data) {
 
     function TransactionMap(data) {
       transmap = {}
-      console.log(data)
-      var bounds = new google.maps.LatLngBounds();
-      d3.entries(data).forEach(function(d){
-        bounds.extend(d.value.lat_lng = new google.maps.LatLng(d.value.contactInfo.geolocation.lat, d.value.contactInfo.geolocation.lng));
-        bounds.extend(d.value.lat_lng_supp = new google.maps.LatLng(d.value.suppliers[0].user.geolocation.lat, d.value.suppliers[0].user.geolocation.lng));
-      });
-      map.fitBounds(bounds);
 
-      var overlay = new google.maps.OverlayView(),
-          r = 4.5,
-          padding = r*2;
-      // Add the container when the overlay is added to the map.
-      overlay.onAdd = function() {
-        var layer = d3.select(this.getPanes().overlayMouseTarget)
-            .append("svg")
-            .attr('class','transactions');
-        overlay.draw = function(){
-          var projection = this.getProjection(),
-              sw = projection.fromLatLngToDivPixel(bounds.getSouthWest()),
-              ne = projection.fromLatLngToDivPixel(bounds.getNorthEast());
-          // extend the boundaries so that markers on the edge aren't cut in half
-          sw.x -= padding;
-          sw.y += padding;
-          ne.x += padding;
-          ne.y -= padding;
+      var overlay = new google.maps.OverlayView();
 
-          d3.select('.transactions')
-            .attr('width',(ne.x - sw.x) + 'px')
-            .attr('height',(sw.y - ne.y) + 'px')
-            .style('position','absolute')
-            .style('left',sw.x+'px')
-            .style('top',ne.y+'px');
+    // Add the container when the overlay is added to the map.
+    overlay.onAdd = function() {
+      var layer = d3.select(this.getPanes().overlayMouseTarget)
+        .append("div")
+        .attr("class", "transactions");
 
-          var tooltip = d3.select("body")
-            .append("div")
-          .attr("class", "tooltip")
-          .style("opacity", 0);
+      overlay.draw = function() {
+        var projection = overlay.getProjection(),
+            padding = 10;
 
-          var line = layer.selectAll('.line')
-            .data(d3.entries(data))
-            .each(transform3)
-            .each(transform4)
-          .enter().append('line')
-            .attr('class','line')
-            .attr('x1', function(d) {
-              d = projection.fromLatLngToDivPixel(d.value.lat_lng_supp);
-              return d.x-sw.x;
-            })
-            .attr('y1', function(d) {
-              d = projection.fromLatLngToDivPixel(d.value.lat_lng_supp);
-              return d.y-ne.y;
-            })
-            .attr('x2', function(d) {
-              d = projection.fromLatLngToDivPixel(d.value.lat_lng);
-              return d.x-sw.x;
-            })
-            .attr('y2', function(d) {
-              d = projection.fromLatLngToDivPixel(d.value.lat_lng);
-              return d.y-ne.y;
-            })
-            .attr('stroke-width', 2)
-            .attr('stroke', "black")
-            .append('title').text(function(d){
-              return ["product: ",d.value.productArchetype.locales.nl_NL[0]];
-            });
+            // var tooltip = d3.select("body")
+            //   .append("div")
+          	// .attr("class", "tooltip")
+          	// .style("opacity", 0);
 
-          var marker = layer.selectAll('.marker')
-            .data(d3.entries(data))
+        var marker = layer.selectAll("svg")
+        .data(d3.entries(data))
+        .each(transform) // update existing markers
+          .enter().append("svg:svg")
             .each(transform)
-          .enter().append('circle')
-            .attr('class','marker')
-            .attr('r',r)
-            .attr('cx',function(d) {
-              d = projection.fromLatLngToDivPixel(d.value.lat_lng);
-              return d.x-sw.x;
-            })
-            .attr('cy',function(d) {
-              d = projection.fromLatLngToDivPixel(d.value.lat_lng);
-              return d.y-ne.y;
-            })
-            .append('title').text(function(d){
-              return ["product: ",d.value.productArchetype.locales.nl_NL[0]];
-            })
+            .attr("class", "marker");
+
+        marker.filter(d => {return d.value[2] != 0 && d.value[3] != 0}).append("svg:circle")
+            .attr("r", 6)
+            .attr("cx", padding)
+            .attr("cy", padding)
+            .attr("fill", "#ff7f50")
+            .attr("stroke", "black");
+            // .on("click", function(d) {
+            //          tooltip.transition()
+            //            .duration(0)
+            //            .style("opacity", 1);
+            //          tooltip.html('Link: ' + d.value[0] + '<br>'
+            //                       + 'Location: '+ d.value[1] + '<br>'
+            //                       + 'Date: ' + d.value[4] + '<br>'
+            //                       + 'Type of violation: ' + d.value[5] + '<br>'
+            //                       + 'Used weapon(s): ' + d.value[6] + '<br>'
+            //                       + 'Description: ' + d.value[7] + '<br>')
+            //            .style("left", (d3.event.pageX + 5) + "px")
+            //            .style("top", (d3.event.pageY - 28) + "px");
+            //      	})
+            //     	.on("mouseout", function(d) {
+            //          tooltip.transition()
+            //          .duration(200)
+            //          .style("opacity", 0);
+            //      });
 
 
-          d3.selectAll('.marker').on("mouseover", function(d) {
-            console.log("hoi")
-          });
 
 
-          var marker2 = layer.selectAll('.marker2')
-            .data(d3.entries(data))
-            .each(transform2)
-          .enter().append('circle')
-            .attr('class','marker2')
-            .attr('r',r)
-            .attr('cx',function(d) {
-              d = projection.fromLatLngToDivPixel(d.value.lat_lng_supp);
-              return d.x-sw.x;
-            })
-            .attr('cy',function(d) {
-              d = projection.fromLatLngToDivPixel(d.value.lat_lng_supp);
-              return d.y-ne.y;
-            })
-            .append('title').text(function(d){
-              return ["product: ",d.value.productArchetype.locales.nl_NL[0]];
-            });
 
-          function transform(d) {
-            d = projection.fromLatLngToDivPixel(d.value.lat_lng);
-            return d3.select(this)
-              .attr('cx',d.x-sw.x)
-              .attr('cy',d.y-ne.y);
-          }
+        function transform(d) {
+          d = new google.maps.LatLng(d.value.contactInfo.geolocation.lat, d.value.contactInfo.geolocation.lng);
+          d = projection.fromLatLngToDivPixel(d);
+          return d3.select(this)
+              .style("margin-left", (d.x + (Math.random() - 0.5) * 14) + "px")
+              .style("margin-top", (d.y + (Math.random() - 0.5) * 14) + "px");
+        }
 
-          function transform2(d) {
-            d = projection.fromLatLngToDivPixel(d.value.lat_lng_supp);
-            return d3.select(this)
-              .attr('cx',d.x-sw.x)
-              .attr('cy',d.y-ne.y);
-          }
 
-          function transform3(d) {
-            d = projection.fromLatLngToDivPixel(d.value.lat_lng_supp);
-            return d3.select(this)
-              .attr('x1',d.x-sw.x)
-              .attr('y1',d.y-ne.y);
-          }
 
-          function transform4(d) {
-            d = projection.fromLatLngToDivPixel(d.value.lat_lng);
-            return d3.select(this)
-              .attr('x2',d.x-sw.x)
-              .attr('y2',d.y-ne.y);
-          }
-        };
+
+
       };
+    };
 
       transmap.update = function(data, timestamp) {
-
         console.log(data)
         var copydata = JSON.parse(JSON.stringify(data));
-        if (timestamp != "All timestamps") {
-          timestamp = ([timestamp.slice(0, 0), "2011-", timestamp.slice(0)].join('').replace(' ','T').split('T'))
-          timestamp[1] = timestamp[1].concat(":00.000Z")
-          timestamp[0] = timestamp[0].split('-')
-          timestamp = timestamp[0][0].concat(timestamp[0][2].concat(timestamp[0][1].concat(timestamp[1])))
-          timestamp = [timestamp.slice(0, 4), "-", timestamp.slice(4)].join('');
-          timestamp = [timestamp.slice(0, 7), "-", timestamp.slice(7)].join('');
-          timestamp = [timestamp.slice(0, 10), "T", timestamp.slice(10)].join('');
+        timestamp = ([timestamp.slice(0, 0), "2011-", timestamp.slice(0)].join('').replace(' ','T').split('T'))
+        timestamp[1] = timestamp[1].concat(":00.000Z")
+        timestamp[0] = timestamp[0].split('-')
+        timestamp = timestamp[0][0].concat(timestamp[0][2].concat(timestamp[0][1].concat(timestamp[1])))
+        timestamp = [timestamp.slice(0, 4), "-", timestamp.slice(4)].join('');
+        timestamp = [timestamp.slice(0, 7), "-", timestamp.slice(7)].join('');
+        timestamp = [timestamp.slice(0, 10), "T", timestamp.slice(10)].join('');
 
-          timestamp = new Date(timestamp)
-          timestamp2 = timestamp
-          timestamp3 = new Date(timestamp2.setHours(timestamp2.getHours() + 6))
-          timestamp = new Date(timestamp.setHours(timestamp.getHours() - 6))
-          for(i = 0; i < copydata.length; i++) {
-            console.log(i)
-            delivery = new Date(copydata[i].delivery.start)
-            if ((delivery.getTime() > timestamp.getTime() && delivery.getTime() < timestamp3.getTime()) == false) {
-              copydata.splice(i, 1);
-              i--;
-            }
+        timestamp = new Date(timestamp)
+        timestamp2 = timestamp
+        timestamp3 = new Date(timestamp2.setHours(timestamp2.getHours() + 6))
+        timestamp = new Date(timestamp.setHours(timestamp.getHours() - 6))
+        for(i = 0; i < copydata.length; i++) {
+          console.log(i)
+          delivery = new Date(copydata[i].delivery.start)
+          if ((delivery.getTime() > timestamp.getTime() && delivery.getTime() < timestamp3.getTime()) == false) {
+            copydata.splice(i, 1);
+            i--;
           }
         }
+
         d3.selectAll(".line").remove()
         d3.selectAll(".marker").remove()
         d3.selectAll(".marker2").remove()
         d3.selectAll(".transactions").remove()
         console.log(data, "deze")
         TransactionMap(copydata)
+
       }
+
       overlay.setMap(map);
     };
 

@@ -69,6 +69,16 @@ img {
 
 .marker:hover {
   cursor: pointer;
+  fill: orange;
+}
+
+.marker2:hover {
+  cursor: pointer;
+  fill: orange;
+}
+
+.line:hover {
+  cursor: pointer;
 }
 
 .transactions {
